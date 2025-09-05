@@ -1,0 +1,174 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        // projects
+        Schema::create('slr_projects', function (Blueprint $t) {
+            $t->uuid('id')->primary();
+            $t->string('name');
+            $t->string('objective');
+            $t->json('weights');
+            $t->json('search_strings');
+            $t->json('inclusion_criteria');
+            $t->float('half_life')->default(3);
+            $t->timestamps();
+        });
+
+        // sources
+        Schema::create('slr_sources', function (Blueprint $t) {
+            $t->id();
+            $t->string('name')->unique();
+            $t->timestamps();
+        });
+
+        // raw_records
+        Schema::create('slr_raw_records', function (Blueprint $t) {
+            $t->uuid('id')->primary();
+            $t->uuid('project_id');
+            $t->foreign('project_id')->references('id')->on('slr_projects')->cascadeOnDelete();
+            $t->foreignId('source_id')->constrained('slr_sources');
+            $t->json('raw_json');
+            $t->timestamp('pulled_at');
+        });
+
+        // works
+        Schema::create('slr_works', function (Blueprint $t) {
+            $t->uuid('id')->primary();
+            $t->uuid('project_id');
+            $t->foreign('project_id')->references('id')->on('slr_projects')->cascadeOnDelete();
+            $t->string('doi')->nullable()->index();
+            $t->text('title');
+            $t->text('abstract')->nullable();
+            $t->integer('year')->nullable();
+            $t->string('venue_name')->nullable();
+            $t->string('venue_type')->nullable();
+            $t->string('issn')->nullable();
+            $t->string('isbn')->nullable();
+            $t->string('openalex_id')->nullable();
+            $t->string('arxiv_id')->nullable();
+            $t->string('s2_id')->nullable();
+            $t->timestamps();
+        });
+
+        // enrichments
+        Schema::create('slr_enrichments', function (Blueprint $t) {
+            $t->uuid('work_id')->primary();
+            $t->foreign('work_id')->references('id')->on('slr_works')->cascadeOnDelete();
+            $t->boolean('is_oa')->default(false);
+            $t->string('oa_url')->nullable();
+            $t->json('code_urls')->nullable();
+            $t->json('data_urls')->nullable();
+            $t->integer('cited_by_count')->default(0);
+            $t->json('fields')->nullable();
+            $t->timestamps();
+        });
+
+        // venue_metrics
+        Schema::create('slr_venue_metrics', function (Blueprint $t) {
+            $t->uuid('id')->primary();
+            $t->string('issn')->nullable()->index();
+            $t->string('venue_name');
+            $t->string('sjr_quartile')->nullable();
+            $t->string('core_rank')->nullable();
+            $t->date('snapshot_date');
+            $t->timestamps();
+        });
+
+        // screenings
+        Schema::create('slr_screenings', function (Blueprint $t) {
+            $t->uuid('id')->primary();
+            $t->uuid('work_id');
+            $t->foreign('work_id')->references('id')->on('slr_works')->cascadeOnDelete();
+            $t->enum('stage', ['title_abstract','full_text']);
+            $t->enum('decision', ['include','exclude','unsure'])->nullable();
+            $t->text('reason')->nullable();
+            $t->morphs('reviewer'); // reviewer_type + reviewer_id
+            $t->timestamp('decided_at')->nullable();
+            $t->timestamps();
+        });
+
+        // criterion_scores
+        Schema::create('slr_criterion_scores', function (Blueprint $t) {
+            $t->uuid('work_id')->primary();
+            $t->foreign('work_id')->references('id')->on('slr_works')->cascadeOnDelete();
+            $t->float('venue_quality')->default(0);
+            $t->float('recency')->default(0);
+            $t->float('oa_repro')->default(0);
+            $t->float('novelty')->default(0);
+            $t->float('realism')->default(0);
+            $t->float('breadth')->default(0);
+            $t->timestamps();
+        });
+
+        // composite_scores
+        Schema::create('slr_composite_scores', function (Blueprint $t) {
+            $t->uuid('work_id')->primary();
+            $t->foreign('work_id')->references('id')->on('slr_works')->cascadeOnDelete();
+            $t->float('total')->default(0);
+            $t->json('breakdown');
+            $t->timestamp('computed_at');
+            $t->timestamps();
+        });
+
+        // expert_reviews
+        Schema::create('slr_expert_reviews', function (Blueprint $t) {
+            $t->uuid('id')->primary();
+            $t->uuid('work_id');
+            $t->foreign('work_id')->references('id')->on('slr_works')->cascadeOnDelete();
+            $t->text('note');
+            $t->integer('adjustment_delta')->default(0);
+            $t->integer('final_rank_override')->nullable();
+            $t->morphs('reviewer');
+            $t->timestamp('decided_at');
+            $t->timestamps();
+        });
+
+        // audit_logs
+        Schema::create('slr_audit_logs', function (Blueprint $t) {
+            $t->uuid('id')->primary();
+            $t->string('actor')->nullable();
+            $t->string('action');
+            $t->json('payload')->nullable();
+            $t->timestamps();
+        });
+
+        // lookups
+        Schema::create('slr_lookups_sjr', function (Blueprint $t) {
+            $t->id();
+            $t->string('issn')->index();
+            $t->string('quartile'); // Q1..Q4
+            $t->date('snapshot_date');
+            $t->timestamps();
+        });
+
+        Schema::create('slr_lookups_core', function (Blueprint $t) {
+            $t->id();
+            $t->string('conference');
+            $t->string('rank'); // A*|A|B|C
+            $t->date('snapshot_date');
+            $t->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('slr_lookups_core');
+        Schema::dropIfExists('slr_lookups_sjr');
+        Schema::dropIfExists('slr_audit_logs');
+        Schema::dropIfExists('slr_expert_reviews');
+        Schema::dropIfExists('slr_composite_scores');
+        Schema::dropIfExists('slr_criterion_scores');
+        Schema::dropIfExists('slr_screenings');
+        Schema::dropIfExists('slr_venue_metrics');
+        Schema::dropIfExists('slr_enrichments');
+        Schema::dropIfExists('slr_works');
+        Schema::dropIfExists('slr_raw_records');
+        Schema::dropIfExists('slr_sources');
+        Schema::dropIfExists('slr_projects');
+    }
+};

@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Mbsoft\SlrRanking\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class SlrRankingCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'slr-ranking';
 
     public $description = 'My command';
 

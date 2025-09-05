@@ -2,11 +2,14 @@
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-use Mbsoft\SlrRanking\Jobs\{PullArxivJob, PullCrossrefJob, PullS2Job};
-use Mbsoft\SlrRanking\Models\{RawRecord, Source};
+use Mbsoft\SlrRanking\Jobs\PullArxivJob;
+use Mbsoft\SlrRanking\Jobs\PullCrossrefJob;
+use Mbsoft\SlrRanking\Jobs\PullS2Job;
+use Mbsoft\SlrRanking\Models\RawRecord;
+use Mbsoft\SlrRanking\Models\Source;
 
 it('pulls crossref with cursor paging', function () {
-    $pid = (string)Str::uuid();
+    $pid = (string) Str::uuid();
     Http::fake([
         '*/works*' => Http::sequence()
             ->push(['message' => ['items' => [['title' => ['A']]], 'next-cursor' => 'XYZ']])
@@ -18,7 +21,7 @@ it('pulls crossref with cursor paging', function () {
 });
 
 it('pulls arxiv pages', function () {
-    $pid = (string)Str::uuid();
+    $pid = (string) Str::uuid();
     Http::fake([
         '*export.arxiv.org/api/query*' => Http::sequence()
             ->push('<feed><entry><id>arxiv:1</id><title>T</title><summary>S</summary><published>2023-01-01T00:00:00Z</published></entry></feed>')
@@ -29,7 +32,7 @@ it('pulls arxiv pages', function () {
 });
 
 it('pulls s2 pages', function () {
-    $pid = (string)Str::uuid();
+    $pid = (string) Str::uuid();
     Http::fake([
         '*/paper/search*' => Http::sequence()
             ->push(['data' => [['title' => 'T1', 'paperId' => 'p1']]])

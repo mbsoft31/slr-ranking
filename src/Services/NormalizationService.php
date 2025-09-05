@@ -24,16 +24,16 @@ class NormalizationService
 
         // Crossref
         if ($source === 'crossref') {
-            $doi   = data_get($raw, 'DOI');
+            $doi = data_get($raw, 'DOI');
             $title = trim((string) (data_get($raw, 'title.0') ?? ''));
-            $year  = (int) (data_get($raw, 'issued.date-parts.0.0')
+            $year = (int) (data_get($raw, 'issued.date-parts.0.0')
                 ?? data_get($raw, 'published-print.date-parts.0.0')
                 ?? data_get($raw, 'published-online.date-parts.0.0'));
             $venue = data_get($raw, 'container-title.0');
-            $type  = data_get($raw, 'type');
-            $venueType = str_contains((string)$type, 'journal') ? 'journal'
-                : (str_contains((string)$type, 'proceedings') ? 'conference' : null);
-            $issn  = data_get($raw, 'ISSN.0');
+            $type = data_get($raw, 'type');
+            $venueType = str_contains((string) $type, 'journal') ? 'journal'
+                : (str_contains((string) $type, 'proceedings') ? 'conference' : null);
+            $issn = data_get($raw, 'ISSN.0');
 
             $abs = data_get($raw, 'abstract');
             if ($abs) {
@@ -44,64 +44,64 @@ class NormalizationService
             }
 
             return [
-                'doi'        => $doi ?: null,
-                'title'      => $title ?: null,
-                'abstract'   => $abs ?: null,
-                'year'       => $year ?: null,
+                'doi' => $doi ?: null,
+                'title' => $title ?: null,
+                'abstract' => $abs ?: null,
+                'year' => $year ?: null,
                 'venue_name' => $venue,
                 'venue_type' => $venueType,
-                'issn'       => $issn,
-                'openalex_id'=> null,
-                'arxiv_id'   => null,
-                's2_id'      => null,
+                'issn' => $issn,
+                'openalex_id' => null,
+                'arxiv_id' => null,
+                's2_id' => null,
             ];
         }
 
-// arXiv
+        // arXiv
         if ($source === 'arxiv') {
-            $id     = data_get($raw, 'id');
-            $title  = trim(preg_replace('/\s+/', ' ', (string) data_get($raw, 'title', '')));
-            $summary= trim((string) data_get($raw, 'summary', ''));
-            $pub    = (string) data_get($raw, 'published');
-            $year   = $pub ? (int) substr($pub, 0, 4) : null;
-            $doi    = data_get($raw, 'doi') ?: null;
+            $id = data_get($raw, 'id');
+            $title = trim(preg_replace('/\s+/', ' ', (string) data_get($raw, 'title', '')));
+            $summary = trim((string) data_get($raw, 'summary', ''));
+            $pub = (string) data_get($raw, 'published');
+            $year = $pub ? (int) substr($pub, 0, 4) : null;
+            $doi = data_get($raw, 'doi') ?: null;
 
             return [
-                'doi'        => $doi,
-                'title'      => $title ?: null,
-                'abstract'   => $summary ?: null,
-                'year'       => $year,
+                'doi' => $doi,
+                'title' => $title ?: null,
+                'abstract' => $summary ?: null,
+                'year' => $year,
                 'venue_name' => 'arXiv',
                 'venue_type' => 'preprint',
-                'issn'       => null,
-                'openalex_id'=> null,
-                'arxiv_id'   => $id,
-                's2_id'      => null,
+                'issn' => null,
+                'openalex_id' => null,
+                'arxiv_id' => $id,
+                's2_id' => null,
             ];
         }
 
-// S2
+        // S2
         if ($source === 's2') {
-            $doi    = data_get($raw, 'externalIds.DOI');
-            $title  = trim((string) data_get($raw, 'title', ''));
-            $abs    = trim((string) data_get($raw, 'abstract', ''));
-            $year   = (int) data_get($raw, 'year');
-            $venue  = data_get($raw, 'venue');
-            $types  = (array) data_get($raw, 'publicationTypes', []);
+            $doi = data_get($raw, 'externalIds.DOI');
+            $title = trim((string) data_get($raw, 'title', ''));
+            $abs = trim((string) data_get($raw, 'abstract', ''));
+            $year = (int) data_get($raw, 'year');
+            $venue = data_get($raw, 'venue');
+            $types = (array) data_get($raw, 'publicationTypes', []);
             $venueType = in_array('JournalArticle', $types, true) ? 'journal'
                 : (in_array('Conference', $types, true) ? 'conference' : null);
 
             return [
-                'doi'        => $doi ?: null,
-                'title'      => $title ?: null,
-                'abstract'   => $abs ?: null,
-                'year'       => $year ?: null,
+                'doi' => $doi ?: null,
+                'title' => $title ?: null,
+                'abstract' => $abs ?: null,
+                'year' => $year ?: null,
                 'venue_name' => $venue,
                 'venue_type' => $venueType,
-                'issn'       => null,
-                'openalex_id'=> null,
-                'arxiv_id'   => null,
-                's2_id'      => (string) data_get($raw, 'paperId'),
+                'issn' => null,
+                'openalex_id' => null,
+                'arxiv_id' => null,
+                's2_id' => (string) data_get($raw, 'paperId'),
             ];
         }
 

@@ -4,7 +4,6 @@ namespace Mbsoft\SlrRanking\Services;
 
 use Mbsoft\SlrRanking\Models\CompositeScore;
 use Mbsoft\SlrRanking\Models\CriterionScore;
-use Mbsoft\SlrRanking\Models\Enrichment;
 use Mbsoft\SlrRanking\Models\Project;
 use Mbsoft\SlrRanking\Models\VenueMetric;
 use Mbsoft\SlrRanking\Models\Work;
@@ -105,7 +104,7 @@ class ScoreService
             return 0.0;
         }
 
-        $below = $all->filter(fn ($v) => (int)$v < $count)->count();
+        $below = $all->filter(fn ($v) => (int) $v < $count)->count();
         $pct = ($below / max(1, $all->count())) * 100.0;
 
         return round($pct, 2);
@@ -114,12 +113,15 @@ class ScoreService
     protected function venueScore(Work $w): float
     {
         $resolved = $this->venues->venueQualityFor($w);
-        if ($resolved !== null) return $resolved;
+        if ($resolved !== null) {
+            return $resolved;
+        }
 
         if (config('slr-ranking.features.citations_percentile_fallback') && $w->enrichment?->cited_by_count !== null) {
             // convert percentile to 0..1 and cap at 0.6
             return min(0.6, $this->citationPercentile($w) / 100.0);
         }
+
         return 0.40;
     }
 }

@@ -24,31 +24,31 @@ class PullCrossrefJob implements ShouldQueue
         $sourceId = Source::firstOrCreate(['name' => 'crossref'])->id;
 
         $cursor = $this->query['cursor'] ?? '*';
-        $q      = $this->query['q'] ?? null;
+        $q = $this->query['q'] ?? null;
         $filter = $this->query['filter'] ?? null;
 
         while (true) {
             $resp = Http::slr()->get("$base/works", [
-                'query'  => $q,
+                'query' => $q,
                 'filter' => $filter,   // e.g. type:journal-article,from-pub-date:2023-01-01
-                'rows'   => 200,
+                'rows' => 200,
                 'cursor' => $cursor,
             ])->throw()->json();
 
             $items = (array) data_get($resp, 'message.items', []);
             foreach ($items as $w) {
                 RawRecord::create([
-                    'id'         => (string) Str::uuid(),
+                    'id' => (string) Str::uuid(),
                     'project_id' => $this->projectId,
-                    'source_id'  => $sourceId,
-                    'raw_json'   => $w,
-                    'pulled_at'  => now(),
+                    'source_id' => $sourceId,
+                    'raw_json' => $w,
+                    'pulled_at' => now(),
                 ]);
                 NormalizeAndUpsertWork::dispatch($this->projectId, 'crossref', $w)->onQueue('normalize');
             }
 
             $next = data_get($resp, 'message.next-cursor');
-            if (!$next) {
+            if (! $next) {
                 break;
             }
             $cursor = $next;
@@ -57,5 +57,4 @@ class PullCrossrefJob implements ShouldQueue
             // if (++$pages > 200) break;
         }
     }
-
 }

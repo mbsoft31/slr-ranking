@@ -34,12 +34,13 @@ class SlrRankingServiceProvider extends PackageServiceProvider
     {
         // register slr Facade
         $this->app->singleton(SlrRanking::class, function () {
-            return new SlrRanking();
+            return new SlrRanking;
         });
 
         // macro for Http client with SLR defaults
         Http::macro('slr', function () {
-            $ua = 'mbsoft31/slr-ranking; contact=' . config('slr-ranking.unpaywall_email');
+            $ua = 'mbsoft31/slr-ranking; contact='.config('slr-ranking.unpaywall_email');
+
             return Http::withHeaders(['User-Agent' => $ua])
                 ->retry(3, 250)
                 ->timeout(30);

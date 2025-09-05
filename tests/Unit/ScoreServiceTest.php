@@ -1,25 +1,29 @@
 <?php
 
 use Illuminate\Support\Str;
-use Mbsoft\SlrRanking\Models\{Enrichment, LookupsCore, LookupsSjr, Project, Work};
+use Mbsoft\SlrRanking\Models\Enrichment;
+use Mbsoft\SlrRanking\Models\LookupsCore;
+use Mbsoft\SlrRanking\Models\LookupsSjr;
+use Mbsoft\SlrRanking\Models\Project;
+use Mbsoft\SlrRanking\Models\Work;
 use Mbsoft\SlrRanking\Services\ScoreService;
 
 it('maps journal quartile via ISSN', function () {
     LookupsSjr::create(['issn' => '1234-5678', 'quartile' => 'Q1', 'snapshot_date' => now()]);
     $p = Project::create([
-        'id'=>(string)Str::uuid(),'name'=>'P','objective'=>'custom',
-        'weights'=>config('slr-ranking.default_weights'),
-        'search_strings'=>[],'inclusion_criteria'=>[],'half_life'=>3,
+        'id' => (string) Str::uuid(), 'name' => 'P', 'objective' => 'custom',
+        'weights' => config('slr-ranking.default_weights'),
+        'search_strings' => [], 'inclusion_criteria' => [], 'half_life' => 3,
     ]);
 
     $w = Work::create([
-        'id'=>(string)Str::uuid(),
-        'project_id'=>$p->id,
-        'issn'=>'1234-5678',
-        'venue_type'=>'journal',
-        'venue_name'=>'Test',
-        'title'=>'Placeholder title',
-        'year'=>2024,
+        'id' => (string) Str::uuid(),
+        'project_id' => $p->id,
+        'issn' => '1234-5678',
+        'venue_type' => 'journal',
+        'venue_name' => 'Test',
+        'title' => 'Placeholder title',
+        'year' => 2024,
     ]);
     $svc = app(ScoreService::class);
     $ref = (new ReflectionClass($svc))->getMethod('venueScore');
@@ -30,18 +34,18 @@ it('maps journal quartile via ISSN', function () {
 it('maps conference via normalized name to CORE', function () {
     LookupsCore::create(['conference' => 'International Foo Bar Conference', 'rank' => 'A', 'snapshot_date' => now()]);
     $p = Project::create([
-        'id'=>(string)Str::uuid(),'name'=>'P','objective'=>'custom',
-        'weights'=>config('slr-ranking.default_weights'),
-        'search_strings'=>[],'inclusion_criteria'=>[],'half_life'=>3,
+        'id' => (string) Str::uuid(), 'name' => 'P', 'objective' => 'custom',
+        'weights' => config('slr-ranking.default_weights'),
+        'search_strings' => [], 'inclusion_criteria' => [], 'half_life' => 3,
     ]);
 
     $w = Work::create([
-        'id'=>(string)Str::uuid(),
-        'project_id'=>$p->id,
-        'venue_type'=>'conference',
-        'venue_name'=>'International Foo Bar Conference',
-        'title'=>'Placeholder title',
-        'year'=>2024,
+        'id' => (string) Str::uuid(),
+        'project_id' => $p->id,
+        'venue_type' => 'conference',
+        'venue_name' => 'International Foo Bar Conference',
+        'title' => 'Placeholder title',
+        'year' => 2024,
     ]);
     $svc = app(ScoreService::class);
     $ref = (new ReflectionClass($svc))->getMethod('venueScore');
@@ -64,10 +68,10 @@ it('computes citation percentile correctly', function () {
 
     // Base work (the “subject” with 50 cites)
     $w = Work::create([
-        'id'         => (string) Str::uuid(),
+        'id' => (string) Str::uuid(),
         'project_id' => $p->id,
-        'title'      => 'Base work',
-        'year'       => 2024,
+        'title' => 'Base work',
+        'year' => 2024,
         'venue_name' => 'Test',
         'venue_type' => 'journal',
     ]);
@@ -77,10 +81,10 @@ it('computes citation percentile correctly', function () {
     foreach ([0, 10, 25, 50, 100] as $c) {
         $wid = (string) Str::uuid();
         Work::create([
-            'id'         => $wid,
+            'id' => $wid,
             'project_id' => $p->id,
-            'title'      => "W-$c",
-            'year'       => 2024,
+            'title' => "W-$c",
+            'year' => 2024,
             'venue_name' => 'Test',
             'venue_type' => 'journal',
         ]);

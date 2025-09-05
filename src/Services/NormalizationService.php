@@ -22,78 +22,86 @@ class NormalizationService
             ];
         }
 
+        // Crossref
         if ($source === 'crossref') {
-            // $raw is a Crossref "work" item
-            $doi = data_get($raw, 'DOI');
-            $titleArr = (array) data_get($raw, 'title', []);
-            $title = trim((string) ($titleArr[0] ?? ''));
-            $year = (int) (data_get($raw, 'issued.date-parts.0.0') ?? data_get($raw, 'published-print.date-parts.0.0'));
+            $doi   = data_get($raw, 'DOI');
+            $title = trim((string) (data_get($raw, 'title.0') ?? ''));
+            $year  = (int) (data_get($raw, 'issued.date-parts.0.0')
+                ?? data_get($raw, 'published-print.date-parts.0.0')
+                ?? data_get($raw, 'published-online.date-parts.0.0'));
             $venue = data_get($raw, 'container-title.0');
-            $type = data_get($raw, 'type'); // journal-article, proceedings-article, etc.
-            $venueType = str_contains($type, 'journal') ? 'journal' : (str_contains($type, 'proceedings') ? 'conference' : null);
-            $issn = data_get($raw, 'ISSN.0');
+            $type  = data_get($raw, 'type');
+            $venueType = str_contains((string)$type, 'journal') ? 'journal'
+                : (str_contains((string)$type, 'proceedings') ? 'conference' : null);
+            $issn  = data_get($raw, 'ISSN.0');
+
+            $abs = data_get($raw, 'abstract');
+            if ($abs) {
+                $abs = preg_replace('/<\/?jats:[^>]+>/', '', $abs);
+                $abs = strip_tags($abs);
+                $abs = html_entity_decode($abs, ENT_QUOTES | ENT_XML1);
+                $abs = trim(preg_replace('/\s+/', ' ', $abs));
+            }
 
             return [
-                'doi' => $doi,
-                'title' => $title,
-                'abstract' => null, // Crossref abstracts are often not present (or JATS-XML)
-                'year' => $year ?: null,
+                'doi'        => $doi ?: null,
+                'title'      => $title ?: null,
+                'abstract'   => $abs ?: null,
+                'year'       => $year ?: null,
                 'venue_name' => $venue,
                 'venue_type' => $venueType,
-                'issn' => $issn,
-                'openalex_id' => null,
-                's2_id' => null,
+                'issn'       => $issn,
+                'openalex_id'=> null,
+                'arxiv_id'   => null,
+                's2_id'      => null,
             ];
         }
 
+// arXiv
         if ($source === 'arxiv') {
-            // $raw is an array from SimpleXML→json
-            $id = data_get($raw, 'id');
-            $title = trim(preg_replace('/\s+/', ' ', (string) data_get($raw, 'title', '')));
-            $summary = trim((string) data_get($raw, 'summary', ''));
-            $published = (string) data_get($raw, 'published');
-            $year = $published ? (int) substr($published, 0, 4) : null;
-            $doi = data_get($raw, 'doi'); // sometimes present
+            $id     = data_get($raw, 'id');
+            $title  = trim(preg_replace('/\s+/', ' ', (string) data_get($raw, 'title', '')));
+            $summary= trim((string) data_get($raw, 'summary', ''));
+            $pub    = (string) data_get($raw, 'published');
+            $year   = $pub ? (int) substr($pub, 0, 4) : null;
+            $doi    = data_get($raw, 'doi') ?: null;
 
             return [
-                'doi' => $doi,
-                'title' => $title,
-                'abstract' => $summary,
-                'year' => $year,
+                'doi'        => $doi,
+                'title'      => $title ?: null,
+                'abstract'   => $summary ?: null,
+                'year'       => $year,
                 'venue_name' => 'arXiv',
                 'venue_type' => 'preprint',
-                'issn' => null,
-                'openalex_id' => null,
-                'arxiv_id' => $id,
-                's2_id' => null,
+                'issn'       => null,
+                'openalex_id'=> null,
+                'arxiv_id'   => $id,
+                's2_id'      => null,
             ];
         }
 
+// S2
         if ($source === 's2') {
-            $doi = data_get($raw, 'externalIds.DOI');
-            $title = trim((string) data_get($raw, 'title', ''));
-            $abstract = (string) data_get($raw, 'abstract', '');
-            $year = (int) data_get($raw, 'year');
-            $venue = data_get($raw, 'venue');
-            $pubTypes = (array) data_get($raw, 'publicationTypes', []);
-            $venueType = null;
-            if (in_array('JournalArticle', $pubTypes)) {
-                $venueType = 'journal';
-            }
-            if (in_array('Conference', $pubTypes)) {
-                $venueType = 'conference';
-            }
+            $doi    = data_get($raw, 'externalIds.DOI');
+            $title  = trim((string) data_get($raw, 'title', ''));
+            $abs    = trim((string) data_get($raw, 'abstract', ''));
+            $year   = (int) data_get($raw, 'year');
+            $venue  = data_get($raw, 'venue');
+            $types  = (array) data_get($raw, 'publicationTypes', []);
+            $venueType = in_array('JournalArticle', $types, true) ? 'journal'
+                : (in_array('Conference', $types, true) ? 'conference' : null);
 
             return [
-                'doi' => $doi,
-                'title' => $title,
-                'abstract' => $abstract ?: null,
-                'year' => $year ?: null,
+                'doi'        => $doi ?: null,
+                'title'      => $title ?: null,
+                'abstract'   => $abs ?: null,
+                'year'       => $year ?: null,
                 'venue_name' => $venue,
                 'venue_type' => $venueType,
-                'issn' => null,
-                'openalex_id' => null,
-                's2_id' => (string) data_get($raw,'paperId'),
+                'issn'       => null,
+                'openalex_id'=> null,
+                'arxiv_id'   => null,
+                's2_id'      => (string) data_get($raw, 'paperId'),
             ];
         }
 

@@ -2,6 +2,7 @@
 
 namespace Mbsoft\SlrRanking;
 
+use Illuminate\Support\Facades\Http;
 use Mbsoft\SlrRanking\Commands\ExportBundleCommand;
 use Mbsoft\SlrRanking\Commands\InstallCommand;
 use Mbsoft\SlrRanking\Commands\RecomputeScoresCommand;
@@ -27,5 +28,21 @@ class SlrRankingServiceProvider extends PackageServiceProvider
                 UploadSjrCommand::class,
                 UploadCoreCommand::class,
             ]);
+    }
+
+    public function boot(): void
+    {
+        // register slr Facade
+        $this->app->singleton(SlrRanking::class, function () {
+            return new SlrRanking();
+        });
+
+        // macro for Http client with SLR defaults
+        Http::macro('slr', function () {
+            $ua = 'mbsoft31/slr-ranking; contact=' . config('slr-ranking.unpaywall_email');
+            return Http::withHeaders(['User-Agent' => $ua])
+                ->retry(3, 250)
+                ->timeout(30);
+        });
     }
 }

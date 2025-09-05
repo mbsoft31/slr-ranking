@@ -20,31 +20,42 @@ class PullCrossrefJob implements ShouldQueue
 
     public function handle(): void
     {
-        $base = config('slr-ranking.endpoints.crossref');
-        $cursor = '*';
+        $base = rtrim(config('slr-ranking.endpoints.crossref'), '/');
         $sourceId = Source::firstOrCreate(['name' => 'crossref'])->id;
 
-        do {
-            $resp = Http::get("$base/works", [
-                'query' => $this->query['q'] ?? null,
-                'filter' => $this->query['filter'] ?? null, // e.g., 'type:journal-article,from-pub-date:2023-01-01'
-                'rows' => 200,
+        $cursor = $this->query['cursor'] ?? '*';
+        $q      = $this->query['q'] ?? null;
+        $filter = $this->query['filter'] ?? null;
+
+        while (true) {
+            $resp = Http::slr()->get("$base/works", [
+                'query'  => $q,
+                'filter' => $filter,   // e.g. type:journal-article,from-pub-date:2023-01-01
+                'rows'   => 200,
                 'cursor' => $cursor,
             ])->throw()->json();
 
-            $items = data_get($resp, 'message.items', []);
+            $items = (array) data_get($resp, 'message.items', []);
             foreach ($items as $w) {
                 RawRecord::create([
-                    'id' => (string) Str::uuid(),
+                    'id'         => (string) Str::uuid(),
                     'project_id' => $this->projectId,
-                    'source_id' => $sourceId,
-                    'raw_json' => $w,
-                    'pulled_at' => now(),
+                    'source_id'  => $sourceId,
+                    'raw_json'   => $w,
+                    'pulled_at'  => now(),
                 ]);
                 NormalizeAndUpsertWork::dispatch($this->projectId, 'crossref', $w)->onQueue('normalize');
             }
 
-            $cursor = data_get($resp, 'message["next-cursor"]');
-        } while ($cursor);
+            $next = data_get($resp, 'message.next-cursor');
+            if (!$next) {
+                break;
+            }
+            $cursor = $next;
+
+            // Safety (optional): stop after N pages if you pass e.g. --max-pages
+            // if (++$pages > 200) break;
+        }
     }
+
 }

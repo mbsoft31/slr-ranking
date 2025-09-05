@@ -1,11 +1,19 @@
 <?php
 
 return [
+
     'half_life' => 3.0,
+
     'default_weights' => [
-        'venue' => 0.30, 'recency' => 0.15, 'oa' => 0.05,
-        'novelty' => 0.20, 'realism' => 0.20, 'breadth' => 0.10,
+        'venue' => 0.30,
+        'recency' => 0.15,
+        'oa' => 0.05,
+
+        'novelty' => 0.20,
+        'realism' => 0.20,
+        'breadth' => 0.10,
     ],
+
     'user_model' => \App\Models\User::class,
 
     'endpoints' => [
@@ -15,6 +23,7 @@ return [
         's2' => env('S2_BASE', 'https://api.semanticscholar.org/graph/v1'),
         'arxiv' => env('ARXIV_BASE', 'https://export.arxiv.org/api'),
     ],
+
     'unpaywall_email' => env('UNPAYWALL_EMAIL'),
 
     // Optional: 'scout' or null

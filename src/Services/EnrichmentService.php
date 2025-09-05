@@ -15,7 +15,7 @@ class EnrichmentService
             return;
         }
         $email = config('slr-ranking.unpaywall_email');
-        $resp = Http::get(config('slr-ranking.endpoints.unpaywall')."/{$work->doi}", ['email' => $email]);
+        $resp = Http::slr()->get(config('slr-ranking.endpoints.unpaywall')."/{$work->doi}", ['email'=>$email]);
         if ($resp->ok()) {
             $j = $resp->json();
             Enrichment::updateOrCreate(['work_id' => $workId], [

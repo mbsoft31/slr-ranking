@@ -34,6 +34,7 @@ return new class extends Migration {
             $t->foreignId('source_id')->constrained('slr_sources');
             $t->json('raw_json');
             $t->timestamp('pulled_at');
+            $t->timestamps();
         });
 
         // works
@@ -53,6 +54,10 @@ return new class extends Migration {
             $t->string('arxiv_id')->nullable();
             $t->string('s2_id')->nullable();
             $t->timestamps();
+
+            $t->index(['project_id','doi']);
+            $t->index(['project_id','year']);
+            $t->index('venue_type');
         });
 
         // enrichments
@@ -66,6 +71,9 @@ return new class extends Migration {
             $t->integer('cited_by_count')->default(0);
             $t->json('fields')->nullable();
             $t->timestamps();
+
+            $t->index('is_oa');
+            $t->index('cited_by_count');
         });
 
         // venue_metrics
@@ -144,6 +152,8 @@ return new class extends Migration {
             $t->string('quartile'); // Q1..Q4
             $t->date('snapshot_date');
             $t->timestamps();
+
+            $t->index(['issn','snapshot_date']);
         });
 
         Schema::create('slr_lookups_core', function (Blueprint $t) {
@@ -152,6 +162,8 @@ return new class extends Migration {
             $t->string('rank'); // A*|A|B|C
             $t->date('snapshot_date');
             $t->timestamps();
+
+            $t->index(['conference','snapshot_date']);
         });
     }
 

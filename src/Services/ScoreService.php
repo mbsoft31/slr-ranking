@@ -11,6 +11,10 @@ use Mbsoft\SlrRanking\Models\Work;
 
 class ScoreService
 {
+    public function __construct(
+        protected VenueResolverService $venues
+    ) {}
+
     public function computeForWork(string $workId): void
     {
         $work = Work::with(['enrichment', 'project', 'score', 'composite'])->findOrFail($workId);
@@ -18,7 +22,7 @@ class ScoreService
         $proj = $work->project;
         $W = collect($proj->weights ?? config('slr-ranking.default_weights'));
 
-        $venue = $this->venueQuality($work);
+        $venue = $this->venueScore($work);
         $recency = $this->recency($work->year, $proj->half_life ?? 3);
         $oa = $this->oaRepro($work);
         $novelty = $work->score->novelty ?? 0;
@@ -89,15 +93,33 @@ class ScoreService
         return min(1.0, $score);
     }
 
-    private function citationPercentile(Work $w): float
+    protected function citationPercentile(Work $w): float
     {
-        $ids = $w->project->works()->pluck('id');
-        $all = Enrichment::whereIn('work_id', $ids)->pluck('cited_by_count')->filter();
+        $count = (int) ($w->enrichment?->cited_by_count ?? 0);
+
+        $all = \Mbsoft\SlrRanking\Models\Enrichment::whereNotNull('cited_by_count')
+            ->where('work_id', '!=', $w->id) // exclude self
+            ->pluck('cited_by_count');
+
         if ($all->isEmpty()) {
             return 0.0;
         }
-        $rank = $all->where('<', $w->enrichment->cited_by_count ?? 0)->count();
 
-        return $rank / max(1, $all->count());
+        $below = $all->filter(fn ($v) => (int)$v < $count)->count();
+        $pct = ($below / max(1, $all->count())) * 100.0;
+
+        return round($pct, 2);
+    }
+
+    protected function venueScore(Work $w): float
+    {
+        $resolved = $this->venues->venueQualityFor($w);
+        if ($resolved !== null) return $resolved;
+
+        if (config('slr-ranking.features.citations_percentile_fallback') && $w->enrichment?->cited_by_count !== null) {
+            // convert percentile to 0..1 and cap at 0.6
+            return min(0.6, $this->citationPercentile($w) / 100.0);
+        }
+        return 0.40;
     }
 }

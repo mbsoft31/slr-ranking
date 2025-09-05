@@ -3,8 +3,8 @@
 namespace Mbsoft\SlrRanking\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Orchestra\Testbench\TestCase as Orchestra;
 use Mbsoft\SlrRanking\SlrRankingServiceProvider;
+use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {

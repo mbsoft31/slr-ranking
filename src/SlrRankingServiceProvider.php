@@ -2,12 +2,12 @@
 
 namespace Mbsoft\SlrRanking;
 
-use Mbsoft\SlrRanking\Commands\{ExportBundleCommand,
-    InstallCommand,
-    RecomputeScoresCommand,
-    RunConnectorsCommand,
-    UploadCoreCommand,
-    UploadSjrCommand};
+use Mbsoft\SlrRanking\Commands\ExportBundleCommand;
+use Mbsoft\SlrRanking\Commands\InstallCommand;
+use Mbsoft\SlrRanking\Commands\RecomputeScoresCommand;
+use Mbsoft\SlrRanking\Commands\RunConnectorsCommand;
+use Mbsoft\SlrRanking\Commands\UploadCoreCommand;
+use Mbsoft\SlrRanking\Commands\UploadSjrCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 

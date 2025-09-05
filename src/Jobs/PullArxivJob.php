@@ -23,38 +23,43 @@ class PullArxivJob implements ShouldQueue
         $base = rtrim(config('slr-ranking.endpoints.arxiv'), '/'); // usually https://export.arxiv.org/api
         $sourceId = Source::firstOrCreate(['name' => 'arxiv'])->id;
 
-        $start    = 0;
-        $pageSize = min(200, (int)($this->query['max_results'] ?? 200));
-        $q        = $this->query['q'] ?? 'all:agriculture';
+        $start = 0;
+        $pageSize = min(200, (int) ($this->query['max_results'] ?? 200));
+        $q = $this->query['q'] ?? 'all:agriculture';
 
         while (true) {
-            $resp = Http::slr()->get($base . '/query', [
+            $resp = Http::slr()->get($base.'/query', [
                 'search_query' => $q,
-                'start'        => $start,
-                'max_results'  => $pageSize,
+                'start' => $start,
+                'max_results' => $pageSize,
             ])->throw()->body();
 
             $xml = @simplexml_load_string($resp);
-            if (!$xml || !isset($xml->entry)) break;
+            if (! $xml || ! isset($xml->entry)) {
+                break;
+            }
 
             $count = 0;
             foreach ($xml->entry as $entry) {
                 $json = json_decode(json_encode($entry), true);
                 RawRecord::create([
-                    'id'         => (string) Str::uuid(),
+                    'id' => (string) Str::uuid(),
                     'project_id' => $this->projectId,
-                    'source_id'  => $sourceId,
-                    'raw_json'   => $json,
-                    'pulled_at'  => now(),
+                    'source_id' => $sourceId,
+                    'raw_json' => $json,
+                    'pulled_at' => now(),
                 ]);
                 NormalizeAndUpsertWork::dispatch($this->projectId, 'arxiv', $json)->onQueue('normalize');
                 $count++;
             }
 
-            if ($count < $pageSize) break;
+            if ($count < $pageSize) {
+                break;
+            }
             $start += $pageSize;
-            if ($start > 10_000) break; // safety
+            if ($start > 10_000) {
+                break;
+            } // safety
         }
     }
-
 }

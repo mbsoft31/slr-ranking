@@ -24,33 +24,36 @@ class PullS2Job implements ShouldQueue
         $sourceId = Source::firstOrCreate(['name' => 'semanticscholar'])->id;
 
         $offset = 0;
-        $limit  = 100;
-        $q      = $this->query['q'] ?? null;
+        $limit = 100;
+        $q = $this->query['q'] ?? null;
 
         while (true) {
             $resp = Http::slr()->get("$base/paper/search", [
-                'query'  => $q,
+                'query' => $q,
                 'fields' => 'title,abstract,venue,year,externalIds,publicationTypes,publicationDate,authors,citationCount,paperId',
                 'offset' => $offset,
-                'limit'  => $limit,
+                'limit' => $limit,
             ])->throw()->json();
 
             $items = $resp['data'] ?? [];
             foreach ($items as $w) {
                 RawRecord::create([
-                    'id'         => (string) Str::uuid(),
+                    'id' => (string) Str::uuid(),
                     'project_id' => $this->projectId,
-                    'source_id'  => $sourceId,
-                    'raw_json'   => $w,
-                    'pulled_at'  => now(),
+                    'source_id' => $sourceId,
+                    'raw_json' => $w,
+                    'pulled_at' => now(),
                 ]);
                 NormalizeAndUpsertWork::dispatch($this->projectId, 's2', $w)->onQueue('normalize');
             }
 
-            if (count($items) < $limit) break;
+            if (count($items) < $limit) {
+                break;
+            }
             $offset += $limit;
-            if ($offset > 5_000) break; // safety
+            if ($offset > 5_000) {
+                break;
+            } // safety
         }
     }
-
 }

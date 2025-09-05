@@ -32,6 +32,8 @@ class SlrRankingServiceProvider extends PackageServiceProvider
 
     public function boot(): void
     {
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
         // register slr Facade
         $this->app->singleton(SlrRanking::class, function () {
             return new SlrRanking();

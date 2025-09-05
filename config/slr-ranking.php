@@ -26,10 +26,10 @@ return [
 
     'http' => [
         // Leave true in prod; if you must work around local CA issues, set HTTP_VERIFY=false in .env temporarily.
-        'verify'          => env('HTTP_VERIFY', true),
-        'timeout'         => env('HTTP_TIMEOUT', 60),
+        'verify' => env('HTTP_VERIFY', true),
+        'timeout' => env('HTTP_TIMEOUT', 60),
         'connect_timeout' => env('HTTP_CONNECT_TIMEOUT', 10),
-        'user_agent'      => env('HTTP_UA', 'SLR-Ranking/0.1 (+you@example.com)'),
+        'user_agent' => env('HTTP_UA', 'SLR-Ranking/0.1 (+you@example.com)'),
     ],
 
     // Optional: S2 Graph v1 sometimes requires an API key (or throttles heavily).
@@ -46,5 +46,3 @@ return [
         'citations_percentile_fallback' => true,
     ],
 ];
-
-

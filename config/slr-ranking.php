@@ -20,8 +20,21 @@ return [
         'openalex' => env('OPENALEX_BASE', 'https://api.openalex.org'),
         'crossref' => env('CROSSREF_BASE', 'https://api.crossref.org'),
         'unpaywall' => 'https://api.unpaywall.org/v2',
-        's2' => env('S2_BASE', 'https://api.semanticscholar.org/graph/v1'),
+        's2' => env('S2_BASE', 'https://api.semanticscholar.org/graph/v1/'),
         'arxiv' => env('ARXIV_BASE', 'https://export.arxiv.org/api'),
+    ],
+
+    'http' => [
+        // Leave true in prod; if you must work around local CA issues, set HTTP_VERIFY=false in .env temporarily.
+        'verify'          => env('HTTP_VERIFY', true),
+        'timeout'         => env('HTTP_TIMEOUT', 60),
+        'connect_timeout' => env('HTTP_CONNECT_TIMEOUT', 10),
+        'user_agent'      => env('HTTP_UA', 'SLR-Ranking/0.1 (+you@example.com)'),
+    ],
+
+    // Optional: S2 Graph v1 sometimes requires an API key (or throttles heavily).
+    's2' => [
+        'api_key' => env('S2_API_KEY', null),
     ],
 
     'unpaywall_email' => env('UNPAYWALL_EMAIL'),
@@ -33,3 +46,5 @@ return [
         'citations_percentile_fallback' => true,
     ],
 ];
+
+

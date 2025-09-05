@@ -28,7 +28,11 @@ class PullS2Job implements ShouldQueue
         $q = $this->query['q'] ?? null;
 
         while (true) {
-            $resp = Http::slr()->get("$base/paper/search", [
+            $h = Http::slr();
+            if ($key = config('slr-ranking.s2.api_key')) {
+                $h = $h->withHeaders(['x-api-key' => $key]);
+            }
+            $resp = $h->get("$base/paper/search", [
                 'query' => $q,
                 'fields' => 'title,abstract,venue,year,externalIds,publicationTypes,publicationDate,authors,citationCount,paperId',
                 'offset' => $offset,

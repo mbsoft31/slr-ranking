@@ -44,8 +44,12 @@ class SlrRankingServiceProvider extends PackageServiceProvider
             $ua = 'mbsoft31/slr-ranking; contact='.config('slr-ranking.unpaywall_email');
 
             return Http::withHeaders(['User-Agent' => $ua])
-                ->retry(3, 250)
-                ->timeout(30);
+                ->retry(3, 1000)
+                ->timeout(config('slr-ranking.http.timeout'))
+                ->connectTimeout(config('slr-ranking.http.connect_timeout'))
+                ->withHeaders([
+                    'User-Agent' => config('slr-ranking.http.user_agent'),
+                ]);
         });
     }
 }

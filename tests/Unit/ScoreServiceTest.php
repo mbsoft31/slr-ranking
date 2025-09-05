@@ -23,7 +23,7 @@ it('maps journal quartile via ISSN', function () {
     ]);
     $svc = app(ScoreService::class);
     $ref = (new ReflectionClass($svc))->getMethod('venueScore');
-    $ref->setAccessible(true);
+    // $ref->setAccessible(true);
     expect($ref->invoke($svc, $w))->toBe(1.0);
 });
 
@@ -45,7 +45,7 @@ it('maps conference via normalized name to CORE', function () {
     ]);
     $svc = app(ScoreService::class);
     $ref = (new ReflectionClass($svc))->getMethod('venueScore');
-    $ref->setAccessible(true);
+    // $ref->setAccessible(true);
     $value = $ref->invoke($svc, $w);
     expect($value)->toBeGreaterThan(0.84)->and($value)->toBeLessThan(0.86);
 });
@@ -90,7 +90,7 @@ it('computes citation percentile correctly', function () {
     // Exclude self in percentile → {0,10,25} below 50 out of 5 = 60%
     $svc = app(ScoreService::class);
     $ref = (new ReflectionClass($svc))->getMethod('citationPercentile');
-    $ref->setAccessible(true);
+    // $ref->setAccessible(true);
 
     $pct = $ref->invoke($svc, $w);
     expect($pct)->toBe(60.00);

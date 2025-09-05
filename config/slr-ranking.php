@@ -11,9 +11,9 @@ return [
     'endpoints' => [
         'openalex' => env('OPENALEX_BASE', 'https://api.openalex.org'),
         'crossref' => env('CROSSREF_BASE', 'https://api.crossref.org'),
-        'unpaywall'=> 'https://api.unpaywall.org/v2',
-        's2'       => env('S2_BASE', 'https://api.semanticscholar.org/graph/v1'),
-        'arxiv'    => env('ARXIV_BASE', 'https://export.arxiv.org/api'),
+        'unpaywall' => 'https://api.unpaywall.org/v2',
+        's2' => env('S2_BASE', 'https://api.semanticscholar.org/graph/v1'),
+        'arxiv' => env('ARXIV_BASE', 'https://export.arxiv.org/api'),
     ],
     'unpaywall_email' => env('UNPAYWALL_EMAIL'),
 

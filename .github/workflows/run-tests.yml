@@ -1,58 +1,55 @@
+# .github/workflows/run-tests.yml
 name: run-tests
 
 on:
   push:
-    paths:
-      - '**.php'
-      - '.github/workflows/run-tests.yml'
-      - 'phpunit.xml.dist'
-      - 'composer.json'
-      - 'composer.lock'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  pull_request:
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 5
+  tests:
+    name: php${{ matrix.php }} / laravel${{ matrix.laravel }} (stable)
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        php: [8.4, 8.3]
-        laravel: [12.*]
-        stability: [prefer-lowest]
-        include:
-          - laravel: 12.*
-            testbench: 10.*
-
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
-
+        php: ['8.3', '8.4']
+        laravel: ['11.*', '12.*']
+        testbench: ['9.*', '10.*']
+        exclude:
+          - laravel: '11.*'
+            testbench: '10.*' # TB 10 targets Laravel 12
+          - laravel: '12.*'
+            testbench: '9.*'  # TB 9 targets Laravel 11
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
+          extensions: mbstring, dom, curl, json, pdo, sqlite, pdo_sqlite
           coverage: none
+      - run: composer config minimum-stability stable
+      - run: composer require "illuminate/contracts:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-progress
+      - run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - run: php -r "echo 'APP_KEY=' . bin2hex(random_bytes(16)) . PHP_EOL;" >> .env
+      - run: vendor/bin/pest --ci
 
-      - name: Setup problem matchers
-        run: |
-          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
-          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-
-      - name: Install dependencies
-        run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
-
-      - name: List Installed Dependencies
-        run: composer show -D
-
-      - name: Execute tests
-        run: vendor/bin/pest --ci
+  lowest-deps:
+    name: php${{ matrix.php }} / laravel${{ matrix.laravel }} (prefer-lowest)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4']
+        laravel: ['12.*']
+        testbench: ['10.*']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, dom, curl, json, pdo, sqlite, pdo_sqlite
+          coverage: none
+      - run: composer update --prefer-lowest --prefer-stable --no-interaction --no-progress
+      - run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - run: php -r "echo 'APP_KEY=' . bin2hex(random_bytes(16)) . PHP_EOL;" >> .env
+      - run: vendor/bin/pest --ci

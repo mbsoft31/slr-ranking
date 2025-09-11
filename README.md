@@ -52,8 +52,8 @@
 
 ## Requirements
 
-* **PHP**: 8.2+
-* **Laravel**: 10.x or 11.x
+* **PHP**: ≥8.3
+* **Laravel**: 11.x and above
 * **Database**: any supported by Laravel (PostgreSQL recommended)
 * **Queues**: Redis (recommended) or any Laravel queue backend
 * **HTTP**: Guzzle (already required)

@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // projects
@@ -55,8 +56,8 @@ return new class extends Migration {
             $t->string('s2_id')->nullable();
             $t->timestamps();
 
-            $t->index(['project_id','doi']);
-            $t->index(['project_id','year']);
+            $t->index(['project_id', 'doi']);
+            $t->index(['project_id', 'year']);
             $t->index('venue_type');
         });
 
@@ -92,8 +93,8 @@ return new class extends Migration {
             $t->uuid('id')->primary();
             $t->uuid('work_id');
             $t->foreign('work_id')->references('id')->on('slr_works')->cascadeOnDelete();
-            $t->enum('stage', ['title_abstract','full_text']);
-            $t->enum('decision', ['include','exclude','unsure'])->nullable();
+            $t->enum('stage', ['title_abstract', 'full_text']);
+            $t->enum('decision', ['include', 'exclude', 'unsure'])->nullable();
             $t->text('reason')->nullable();
             $t->morphs('reviewer'); // reviewer_type + reviewer_id
             $t->timestamp('decided_at')->nullable();
@@ -153,7 +154,7 @@ return new class extends Migration {
             $t->date('snapshot_date');
             $t->timestamps();
 
-            $t->index(['issn','snapshot_date']);
+            $t->index(['issn', 'snapshot_date']);
         });
 
         Schema::create('slr_lookups_core', function (Blueprint $t) {
@@ -163,7 +164,7 @@ return new class extends Migration {
             $t->date('snapshot_date');
             $t->timestamps();
 
-            $t->index(['conference','snapshot_date']);
+            $t->index(['conference', 'snapshot_date']);
         });
     }
 

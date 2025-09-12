@@ -7,8 +7,6 @@ use Mbsoft\SlrRanking\Support\OpenAlex;
 class NormalizationService
 {
     /**
-     * @param string $source
-     * @param array $raw
      * @return array: #ArrayShape['doi' => string|null, 'title' => string|null, 'abstract' => string|null, 'year' => int|null, 'venue_name' => string|null, 'venue_type' => string|null,'issn' => string|null,'isbn' => string|null,'openalex_id' => string|null,'arxiv_id' => string|null,'s2_id' => string|null]
      */
     public function normalize(string $source, array $raw): array

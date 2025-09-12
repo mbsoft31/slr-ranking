@@ -2,12 +2,16 @@
 
 namespace Mbsoft\SlrRanking\Services;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Mbsoft\SlrRanking\Models\Enrichment;
 use Mbsoft\SlrRanking\Models\Work;
 
 class EnrichmentService
 {
+    /**
+     * @throws ConnectionException
+     */
     public function unpaywall(string $workId): void
     {
         $work = Work::findOrFail($workId);
@@ -39,6 +43,9 @@ class EnrichmentService
         ]);
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public function citations(string $workId): void
     {
         $work = Work::with('enrichment')->findOrFail($workId);

@@ -6,6 +6,11 @@ use Mbsoft\SlrRanking\Support\OpenAlex;
 
 class NormalizationService
 {
+    /**
+     * @param string $source
+     * @param array $raw
+     * @return array: #ArrayShape['doi' => string|null, 'title' => string|null, 'abstract' => string|null, 'year' => int|null, 'venue_name' => string|null, 'venue_type' => string|null,'issn' => string|null,'isbn' => string|null,'openalex_id' => string|null,'arxiv_id' => string|null,'s2_id' => string|null]
+     */
     public function normalize(string $source, array $raw): array
     {
         if ($source === 'openalex') {
@@ -15,7 +20,7 @@ class NormalizationService
                 'abstract' => OpenAlex::expandAbstract(data_get($raw, 'abstract_inverted_index') ?? null),
                 'year' => (int) data_get($raw, 'publication_year'),
                 'venue_name' => data_get($raw, 'host_venue.display_name'),
-                'venue_type' => data_get($raw, 'host_venue.type'), // journal|conference|repository
+                'venue_type' => data_get($raw, 'host_venue.type'),
                 'issn' => data_get($raw, 'host_venue.issn.0'),
                 'openalex_id' => data_get($raw, 'id'),
                 's2_id' => data_get($raw, 'ids.semantic_scholar'),

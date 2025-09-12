@@ -9,6 +9,7 @@ use Mbsoft\SlrRanking\Models\Project;
 class ProjectFactory extends Factory
 {
     protected $model = Project::class;
+
     public function definition(): array
     {
         return [

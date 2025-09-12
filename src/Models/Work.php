@@ -4,6 +4,7 @@ namespace Mbsoft\SlrRanking\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Mbsoft\SlrRanking\Database\Factories\WorkFactory;
 
 class Work extends Model
 {
@@ -35,5 +36,10 @@ class Work extends Model
     public function composite()
     {
         return $this->hasOne(CompositeScore::class, 'work_id');
+    }
+
+    protected static function newFactory(): WorkFactory
+    {
+        return WorkFactory::new();
     }
 }

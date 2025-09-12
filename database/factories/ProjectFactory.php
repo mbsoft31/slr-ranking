@@ -4,32 +4,34 @@ namespace Mbsoft\SlrRanking\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Mbsoft\SlrRanking\Models\Project;
 
 class ProjectFactory extends Factory
 {
+    protected $model = Project::class;
     public function definition(): array
     {
         return [
             'id' => Str::uuid(),
-            'name' => $this->faker->sentence(3),
-            'objective' => $this->faker->paragraph(2),
+            'name' => fake()->sentence(3),
+            'objective' => fake()->paragraph(2),
             'weights' => [
-                'novelty' => $this->faker->randomFloat(2, 0.1, 0.5),
-                'methodology' => $this->faker->randomFloat(2, 0.1, 0.4),
-                'reproducibility' => $this->faker->randomFloat(2, 0.1, 0.3),
-                'impact' => $this->faker->randomFloat(2, 0.1, 0.3),
+                'novelty' => fake()->randomFloat(2, 0.1, 0.5),
+                'methodology' => fake()->randomFloat(2, 0.1, 0.4),
+                'reproducibility' => fake()->randomFloat(2, 0.1, 0.3),
+                'impact' => fake()->randomFloat(2, 0.1, 0.3),
             ],
             'search_strings' => [
-                $this->faker->words(3, true),
-                $this->faker->words(2, true),
-                $this->faker->words(4, true),
+                fake()->words(3, true),
+                fake()->words(2, true),
+                fake()->words(4, true),
             ],
             'inclusion_criteria' => [
-                $this->faker->sentence(),
-                $this->faker->sentence(),
-                $this->faker->sentence(),
+                fake()->sentence(),
+                fake()->sentence(),
+                fake()->sentence(),
             ],
-            'half_life' => $this->faker->randomFloat(1, 2.0, 5.0),
+            'half_life' => fake()->randomFloat(1, 2.0, 5.0),
         ];
     }
 }

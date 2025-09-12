@@ -13,15 +13,15 @@ class WorkFactory extends Factory
         return [
             'id' => Str::uuid(),
             'project_id' => Project::factory(),
-            'doi' => '10.' . $this->faker->numberBetween(1000, 9999) . '/' . $this->faker->lexify('????.????'),
+            'doi' => '10.'.$this->faker->numberBetween(1000, 9999).'/'.$this->faker->lexify('????.????'),
             'title' => $this->faker->sentence(6),
             'abstract' => $this->faker->paragraphs(3, true),
             'year' => $this->faker->numberBetween(2015, 2025),
-            'venue_name' => $this->faker->company() . ' Conference',
+            'venue_name' => $this->faker->company().' Conference',
             'venue_type' => $this->faker->randomElement(['conference', 'journal', 'workshop']),
             'issn' => $this->faker->numerify('####-####'),
             'isbn' => $this->faker->isbn13(),
-            'openalex_id' => 'W' . $this->faker->numerify('#########'),
+            'openalex_id' => 'W'.$this->faker->numerify('#########'),
             'arxiv_id' => $this->faker->numerify('####.#####'),
             's2_id' => $this->faker->numerify('#########'),
         ];
